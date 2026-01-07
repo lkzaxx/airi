@@ -1,8 +1,8 @@
 {
   "publisher": "proj-airi",
-  "name": "@proj-airi/airi-plugin-vscode",
+  "name": "airi-vscode",
   "displayName": "AIRI",
-  "version": "0.8.0-alpha.8",
+  "version": "0.8.10089000",
   "private": true,
   "description": "VSCode extension that shares your coding context with AIRI",
   "repository": {

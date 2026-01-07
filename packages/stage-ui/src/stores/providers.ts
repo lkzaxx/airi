@@ -2048,14 +2048,14 @@ export const useProvidersStore = defineStore('providers', () => {
 
   // Function to get provider object by provider id
   async function getProviderInstance<R extends
-  | ChatProvider
-  | ChatProviderWithExtraOptions
-  | EmbedProvider
-  | EmbedProviderWithExtraOptions
-  | SpeechProvider
-  | SpeechProviderWithExtraOptions
-  | TranscriptionProvider
-  | TranscriptionProviderWithExtraOptions,
+    | ChatProvider
+    | ChatProviderWithExtraOptions
+    | EmbedProvider
+    | EmbedProviderWithExtraOptions
+    | SpeechProvider
+    | SpeechProviderWithExtraOptions
+    | TranscriptionProvider
+    | TranscriptionProviderWithExtraOptions,
   >(providerId: string): Promise<R> {
     const config = providerCredentials.value[providerId]
     if (!config)
