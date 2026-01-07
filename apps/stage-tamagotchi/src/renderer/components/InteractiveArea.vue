@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import type { ChatProvider } from '@xsai-ext/shared-providers'
+import type { ChatHistoryItem } from '@proj-airi/stage-ui/types/chat'
+import type { ChatProvider } from '@xsai-ext/providers/utils'
 
+import { ChatHistory } from '@proj-airi/stage-ui/components'
 import { useMicVAD } from '@proj-airi/stage-ui/composables'
 import { useChatStore } from '@proj-airi/stage-ui/stores/chat'
 import { useConsciousnessStore } from '@proj-airi/stage-ui/stores/modules/consciousness'
@@ -8,10 +10,8 @@ import { useProvidersStore } from '@proj-airi/stage-ui/stores/providers'
 import { useSettingsAudioDevice } from '@proj-airi/stage-ui/stores/settings'
 import { BasicTextarea } from '@proj-airi/ui'
 import { storeToRefs } from 'pinia'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-import TamagotchiChatHistory from './ChatHistory.vue'
 
 import { widgetsTools } from '../stores/tools/builtin/widgets'
 
@@ -21,8 +21,9 @@ const attachments = ref<{ type: 'image', data: string, mimeType: string, url: st
 
 const { askPermission } = useSettingsAudioDevice()
 const { enabled, selectedAudioInput } = storeToRefs(useSettingsAudioDevice())
-const { send, onAfterMessageComposed, discoverToolsCompatibility, cleanupMessages } = useChatStore()
-const { messages } = storeToRefs(useChatStore())
+const chatStore = useChatStore()
+const { send, onAfterMessageComposed, discoverToolsCompatibility, cleanupMessages } = chatStore
+const { messages, sending, streamingMessage } = storeToRefs(chatStore)
 const { t } = useI18n()
 const providersStore = useProvidersStore()
 const { activeModel, activeProvider } = storeToRefs(useConsciousnessStore())
@@ -37,10 +38,16 @@ async function handleSend() {
     return
   }
 
+  const textToSend = messageInput.value
+  const attachmentsToSend = attachments.value.map(att => ({ ...att }))
+
+  // optimistic clear
+  messageInput.value = ''
+  attachments.value = []
+
   try {
     const providerConfig = providersStore.getProviderConfig(activeProvider.value)
-    const attachmentsToSend = attachments.value.map(({ data, mimeType, type }) => ({ data, mimeType, type }))
-    await send(messageInput.value, {
+    await send(textToSend, {
       model: activeModel.value,
       chatProvider: await providersStore.getProviderInstance<ChatProvider>(activeProvider.value),
       providerConfig,
@@ -48,10 +55,15 @@ async function handleSend() {
       tools: widgetsTools,
     })
 
-    // clear after sending
-    messageInput.value = ''
+    attachmentsToSend.forEach(att => URL.revokeObjectURL(att.url))
   }
   catch (error) {
+    // restore on failure
+    messageInput.value = textToSend
+    attachments.value = attachmentsToSend.map(att => ({
+      ...att,
+      url: URL.createObjectURL(new Blob([Uint8Array.from(atob(att.data), c => c.charCodeAt(0))], { type: att.mimeType })),
+    }))
     messages.value.pop()
     messages.value.push({
       role: 'error',
@@ -142,12 +154,18 @@ onAfterMessageComposed(async () => {
   attachments.value.forEach(att => URL.revokeObjectURL(att.url))
   attachments.value = []
 })
+
+const historyMessages = computed(() => messages.value as unknown as ChatHistoryItem[])
 </script>
 
 <template>
   <div h-full w-full flex="~ col gap-1">
     <div w-full flex-1 overflow-hidden>
-      <TamagotchiChatHistory />
+      <ChatHistory
+        :messages="historyMessages"
+        :sending="sending"
+        :streaming-message="streamingMessage"
+      />
     </div>
     <div v-if="attachments.length > 0" class="flex flex-wrap gap-2 border-t border-primary-100 p-2">
       <div v-for="(attachment, index) in attachments" :key="index" class="relative">
@@ -173,7 +191,8 @@ onAfterMessageComposed(async () => {
     <BasicTextarea
       v-model="messageInput"
       :placeholder="t('stage.message')"
-      text="primary-600 dark:primary-100  placeholder:primary-500"
+      class="ph-no-capture"
+      text="primary-600 dark:primary-100  placeholder:primary-500 dark:placeholder:primary-200"
       border="solid 2 primary-200/20 dark:primary-400/20"
       bg="primary-100/50 dark:primary-900/70"
       max-h="[10lh]" min-h="[1lh]"

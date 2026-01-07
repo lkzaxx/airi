@@ -1,6 +1,3 @@
-import type { AnalyserBeatEvent, AnalyserWorkletParameters } from '@nekopaw/tempora'
-import type { BeatSyncDetectorState } from '@proj-airi/stage-shared/beat-sync'
-
 import { defineEventa, defineInvokeEventa } from '@moeru/eventa'
 
 export const electronStartTrackMousePosition = defineInvokeEventa('eventa:invoke:electron:start-tracking-mouse-position')
@@ -9,6 +6,7 @@ export const electronOpenMainDevtools = defineInvokeEventa('eventa:invoke:electr
 export const electronOpenSettings = defineInvokeEventa('eventa:invoke:electron:windows:settings:open')
 export const electronOpenChat = defineInvokeEventa('eventa:invoke:electron:windows:chat:open')
 export const electronOpenSettingsDevtools = defineInvokeEventa('eventa:invoke:electron:windows:settings:devtools:open')
+export const electronOpenDevtoolsWindow = defineInvokeEventa<void, { route?: string }>('eventa:invoke:electron:windows:devtools:open')
 export const captionIsFollowingWindowChanged = defineEventa<boolean>('eventa:event:electron:windows:caption-overlay:is-following-window-changed')
 export const captionGetIsFollowingWindow = defineInvokeEventa<boolean>('eventa:invoke:electron:windows:caption-overlay:get-is-following-window')
 
@@ -74,10 +72,5 @@ export const widgetsRemoveEvent = defineEventa<{ id: string }>('eventa:event:ele
 export const widgetsClearEvent = defineEventa('eventa:event:electron:windows:widgets:clear')
 export const widgetsUpdateEvent = defineEventa<{ id: string, componentProps?: Record<string, any> }>('eventa:event:electron:windows:widgets:update')
 
-export const beatSyncElectronSignalBeat = defineInvokeEventa<void, AnalyserBeatEvent>('eventa:event:electron:beat-sync:electron:signal-beat')
-export const beatSyncElectronChangeState = defineInvokeEventa<void, BeatSyncDetectorState>('eventa:event:electron:beat-sync:electron:change-state')
-export const beatSyncElectronGetState = defineInvokeEventa<BeatSyncDetectorState>('eventa:event:electron:beat-sync:electron:get-state')
-export const beatSyncElectronToggle = defineInvokeEventa<void, boolean>('eventa:event:electron:beat-sync:electron:toggle')
-export const beatSyncElectronUpdateParameters = defineInvokeEventa<void, Partial<AnalyserWorkletParameters>>('eventa:event:electron:beat-sync:electron:update-parameters')
-
 export { electron } from './electron'
+export * from './electron-updater'

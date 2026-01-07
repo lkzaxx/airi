@@ -22,12 +22,17 @@ export default defineConfig({
     'apps/stage-tamagotchi/src-tauri/**',
     'apps/stage-tamagotchi-electron/out/**',
     'apps/stage-tamagotchi-electron/src/renderer/bindings/**',
+    'apps/stage-pocket/ios/**',
+    'apps/stage-pocket/android/**',
     'crates/**',
     '**/drizzle/**',
     '**/.astro/**',
   ],
 }, {
   rules: {
+    'pnpm/json-valid-catalog': 'off',
+    'pnpm/json-enforce-catalog': 'off',
+    'pnpm/yaml-enforce-settings': 'off',
     'antfu/import-dedupe': 'error',
     // TODO: remove this
     'depend/ban-dependencies': 'warn',

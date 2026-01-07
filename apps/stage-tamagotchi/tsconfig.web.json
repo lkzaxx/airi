@@ -15,6 +15,9 @@
     "paths": {
       "@proj-airi/stage-ui/*": [
         "../../packages/stage-ui/src/*"
+      ],
+      "@proj-airi/stage-layouts/*": [
+        "../../packages/stage-layouts/src/*"
       ]
     },
     "resolveJsonModule": true,
@@ -22,7 +25,7 @@
       "vitest",
       "vite/client",
       "vite-plugin-vue-layouts/client",
-      "unplugin-vue-macros/macros-global",
+      "vue-macros/macros-global",
       "unplugin-vue-router/client",
       "@types/audioworklet",
       "unplugin-info/client",

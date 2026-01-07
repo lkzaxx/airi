@@ -10,17 +10,18 @@ export async function packageJSONForVSCode(name: string) {
   if (json.name !== name) {
     json.name = name
 
-    await writeFile(new URL('../package.json', import.meta.url), JSON.stringify(json, null, 2), 'utf-8')
+    await writeFile(new URL('../package.json', import.meta.url), `${JSON.stringify(json, null, 2)}\n`, 'utf-8')
   }
 
   const numericVersion = encodeNumericVersion(originalVersion)
   if (json.version !== numericVersion.version) {
     json.version = numericVersion.version
 
-    await writeFile(new URL('../package.json', import.meta.url), JSON.stringify(json, null, 2), 'utf-8')
+    await writeFile(new URL('../package.json', import.meta.url), `${JSON.stringify(json, null, 2)}\n`, 'utf-8')
   }
 
   return {
+    json,
     originalName,
     originalVersion,
     name,
@@ -30,7 +31,7 @@ export async function packageJSONForVSCode(name: string) {
       json.name = originalName
       json.version = originalVersion
 
-      await writeFile(new URL('../package.json', import.meta.url), JSON.stringify(json, null, 2), 'utf-8')
+      await writeFile(new URL('../package.json', import.meta.url), `${JSON.stringify(json, null, 2)}\n`, 'utf-8')
     },
   }
 }

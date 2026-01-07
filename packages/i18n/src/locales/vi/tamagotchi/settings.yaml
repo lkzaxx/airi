@@ -21,3 +21,24 @@ pages:
       toggle-ignore-mouse-event:
         label: Bật/Tắt Bỏ qua sự kiện chuột
       press-keys: Nhấn phím...
+    developer:
+      sections:
+        section:
+          use-window-mouse:
+            title: useWindowMouse
+            description: Test the Electron window cursor position
+devtools:
+  title: Developer
+  pages:
+    context-flow:
+      title: Context Flow
+    lag-visualizer:
+      title: Lag Visualizer
+    performance-visualizer:
+      title: Performance Visualizer
+      description: Toggle FPS/long task/memory overlay
+    markdown-stress:
+      title: Markdown Stress
+      description: Stress markdown parsing and rendering with heavy chat payloads
+    widgets-calling:
+      title: Widget Calling

@@ -25,6 +25,7 @@ dialogs:
     skipForNow: Skip for now
     saveAndContinue: Save and Continue
     next: Next
+    retry: Retry
     start: Let's do it!
     select-model: Choose model
     no-models: No available models
@@ -73,7 +74,7 @@ pages:
     activate: Activate
     active: Active
     active_badge: Currently Active
-    cancel: Cancel
+    cancel: Cancel action
     card_not_found: Card not found
     character: Character
     close: Close
@@ -154,6 +155,52 @@ pages:
   memory:
     description: Where memories got stored, and organized
     title: Memory
+  data:
+    title: Data
+    description: Manage stored AIRI data, exports, and resets
+    sections:
+      chats:
+        title: Chat sessions
+        description: Export or import saved chat sessions.
+        export: Export chats
+        import: Import chats
+        delete: Delete all chat sessions
+      models:
+        title: Models
+        description: Remove imported Live2D/VRM models.
+        delete: Delete all models
+      modules:
+        title: Modules
+        description: Reset module preferences and credentials.
+        reset: Reset module settings
+      providers:
+        title: Providers
+        description: Reset all provider settings and credentials.
+        reset: Reset provider settings
+      danger:
+        title: Danger zone
+        description: Irreversible actions. Export what you need before continuing.
+      all:
+        title: Delete all data
+        description: Wipe every local setting, provider config, and model.
+        delete: Delete all data
+      desktop:
+        title: Reset desktop settings & states
+        description: Clear AIRI desktop settings and runtime state.
+        reset: Reset desktop data
+    confirmations:
+      tooltip: Are you sure?
+      'yes': 'Yes'
+    status:
+      exported: Chat sessions exported.
+      imported: Chat sessions imported.
+      import_error: Failed to import chat sessions. Please check the file format.
+      chats_deleted: Chat sessions deleted.
+      models_deleted: Models deleted.
+      modules_reset: Module settings reset.
+      providers_reset: Provider settings reset.
+      all_deleted: All local data deleted.
+      desktop_reset: Desktop data reset.
   models:
     description: Live2D, VRM, etc.
     title: Models
@@ -227,6 +274,9 @@ pages:
             custom_model_placeholder: Enter custom model name...
             description: Select the suitable LLM provider for consciousness
             error: Error loading models
+            health_check_failed: Health check failed
+            no_providers_configured_title: No Providers Configured
+            no_providers_configured_description: Click here to set up your LLM providers
             expand: Expand
             loading: Loading available models...
             manual_model_name: Model Name
@@ -374,7 +424,73 @@ pages:
         AIRI requires at least one {chat} provider to be configured to think,
         and behave properly. You could think of it as the brain of the
         characters living in AIRI system.
+    catalog:
+      edit:
+        config-id-not-found: Provider configuration not found.
+        definition-id-not-found: Provider definition not found.
+        actions:
+          more-options: More options
+          delete: Delete
+        validation:
+          failed:
+            title: Please check your provider settings, validation failed.
+            description: You can still save the current configuration if you want to proceed.
+            action: Save anyway
+        config:
+          common:
+            fields:
+              field:
+                api-key:
+                  label: API Key
+                  description: API Key used to authorize requests to this provider
+                  placeholder: sk-...
+                base-url:
+                  label: Base URL
+                  description: >-
+                    The base url used to connect to remote service. Often looks
+                    like http://localhost:11434/v1 or https://example.com/v1.
+                  placeholder: Base url...
+                headers:
+                  label: Custom HTTP Headers
+                  description: Add custom HTTP headers
+                  key:
+                    placeholder: Key
+                  value:
+                    placeholder: Value
+        validators:
+          actions:
+            validate: Validate
+          empty: No validation steps available.
+          openai-compatible:
+            check-config:
+              title: Configuration
+            check-connectivity:
+              title: Connectivity
+            check-supports-model-listing:
+              title: List Models
+            check-supports-chat-completion:
+              title: Chat Completion
+          status:
+            validating: Validating...
+            valid: Passed
+            invalid: Errored
+          title: Checks
+        providers:
+          provider:
+            ollama:
+              troubleshooting:
+                validators:
+                  openai-compatible-check-connectivity:
+                    label: Extra configuration needed for Ollama
+                    content: >-
+                      Sorry to hear that Connectivity check failed for Ollama.
+                      Don't worry, for Ollama instances, extra configuration is
+                      needed for making it pass for Ollama. You need to set
+                      <code>OLLAMA_HOST</code> explicitly when start the Ollama
+                      application or Ollama CLI server, for detailed
+                      information, check <a href="https://airi.moeru.ai/docs/en/docs/manual/integrations/providers/chat/ollama">Ollama integration guide</a>.
     common:
+      continueAnyway: Continue Anyway
       fields:
         field:
           api-key:
@@ -457,6 +573,9 @@ pages:
             volume:
               description: Adjust the volume of speech
               label: Volume
+      deepgram-tts:
+        description: deepgram.com
+        title: Deepgram
       deepseek:
         description: deepseek.com
         title: DeepSeek
@@ -552,6 +671,9 @@ pages:
       google-generative-ai:
         description: gemini.google.com
         title: Google Gemini
+      groq:
+        description: groq.com
+        title: Groq
       featherless:
         description: featherless.ai
         title: Featherless AI
@@ -616,68 +738,80 @@ pages:
           title: Developer
           sections:
             section:
+              performance-visualizer:
+                title: Performance Visualizer
+                description: Toggle FPS/long task/memory overlay
+              markdown-stress:
+                title: Markdown Stress
+                description: Stress markdown parsing and rendering with heavy chat payloads
               use-magic-keys:
                 title: useMagicKeys
                 description: Test shortcuts
         theme-presets:
           presets:
-            - colors:
-                - AIRI Green
+            default:
+              colors:
+                color-1: AIRI Green
               description: The default greenish theme color, brought by AIRI to you!
               title: Default Color
-            - colors:
-                - Taupe
-                - Beige
-                - Ash Grey
-                - Light Taupe
-                - Ivory
-                - Olive Grey
-                - Sand
-                - Warm Grey
+            morandi:
+              colors:
+                color-1: Taupe
+                color-2: Beige
+                color-3: Ash Grey
+                color-4: Light Taupe
+                color-5: Ivory
+                color-6: Olive Grey
+                color-7: Sand
+                color-8: Warm Grey
               description: Soft, muted tones inspired by Giorgio Morandi's paintings
               title: Morandi Colors
-            - colors:
-                - Sky Blue
-                - Mist
-                - Sand
-                - Moss Green
-                - Water Lily
-                - Wheat
-                - Slate Blue
-                - Sage
+            monet:
+              colors:
+                color-1: Sky Blue
+                color-2: Mist
+                color-3: Sand
+                color-4: Moss Green
+                color-5: Water Lily
+                color-6: Wheat
+                color-7: Slate Blue
+                color-8: Sage
               description: Impressionist palette inspired by Claude Monet's works
               title: Monet Colors
-            - colors:
-                - Tan
-                - Warm Taupe
-                - Umber
-                - Coffee
-                - Bronze
-                - Gold
-                - Mustard
-                - Amber
+            japanese:
+              colors:
+                color-1: Tan
+                color-2: Warm Taupe
+                color-3: Umber
+                color-4: Coffee
+                color-5: Bronze
+                color-6: Gold
+                color-7: Mustard
+                color-8: Amber
               description: Traditional Japanese color palette
               title: Japanese Colors
-            - colors:
-                - Nordic Blue
-                - Ice
-                - Fjord
-                - Steel
-                - Glacier
-                - Slate
-                - Cloud
-                - Stone
+            nordic:
+              colors:
+                color-1: Nordic Blue
+                color-2: Ice
+                color-3: Fjord
+                color-4: Steel
+                color-5: Glacier
+                color-6: Slate
+                color-7: Cloud
+                color-8: Stone
               description: Scandinavian minimalist color scheme
               title: Nordic Colors
-            - colors:
-                - Rosy Dawn
-                - Chinese Red
-                - Smoky Brown
-                - Bamboo Green
-                - Dark Purple
-                - Golden Yellow
-                - Azure Blue
-                - Ochre
+            chinese:
+              colors:
+                color-1: Rosy Dawn
+                color-2: Chinese Red
+                color-3: Smoky Brown
+                color-4: Bamboo Green
+                color-5: Dark Purple
+                color-6: Golden Yellow
+                color-7: Azure Blue
+                color-8: Ochre
               description: >-
                 Traditional Chinese colors, derived from ancient textiles,
                 porcelain and paintings
@@ -741,4 +875,6 @@ vrm:
     skybox-specular-mix: Specular Mix
 wip:
   title: Work in Progress
-  description: This feature is currently under development and not yet publicly available. Check back in future updates for this functionality.
+  description: >-
+    This feature is currently under development and not yet publicly available.
+    Check back in future updates for this functionality.

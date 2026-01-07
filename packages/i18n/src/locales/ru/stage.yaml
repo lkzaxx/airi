@@ -4,6 +4,7 @@ chat:
       airi: AIRI
       core-system: Core система
       you: Ты
+  reasoning: Reasoning
 message: Спроси что-нибудь
 operations:
   load-models: Загрузить модели
@@ -17,14 +18,14 @@ viewers:
   debug-menu:
     emotions: Эмоции
     emotions-btn:
-      angry: 😠 Злость
-      awkward: 😳 Неловкость
-      happy: 😄 Радость
-      neutral: 🙂 Нейтраль
-      question: 🤔 Вопрос
-      sad: 😫 Грусть
-      surprised: 🤯 Удивление
-      think: 🤨 Задумчивость
+      angry: '😠 Злость'
+      awkward: '😳 Неловкость'
+      happy: '😄 Радость'
+      neutral: '🙂 Нейтраль'
+      question: '🤔 Вопрос'
+      sad: '😫 Грусть'
+      surprised: '🤯 Удивление'
+      think: '🤨 Задумчивость'
     vrm:
       camera: Камера
       model:

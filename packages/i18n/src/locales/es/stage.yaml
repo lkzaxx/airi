@@ -4,6 +4,7 @@ chat:
       airi: AIRI
       core-system: Sistema Central
       you: Tu
+  reasoning: Reasoning
 message: Dile algo...
 operations:
   load-models: Cargar Modelos
@@ -17,14 +18,14 @@ viewers:
   debug-menu:
     emotions: Emociones
     emotions-btn:
-      angry: 😠 Enojado
-      awkward: 😳 Torpe
-      happy: 😄 Feliz
-      neutral: 🙂 Neutro
-      question: 🤔 Pregunta
-      sad: 😫 Triste
-      surprised: 🤯 Sorprendido
-      think: 🤨 Pensar
+      angry: '😠 Enojado'
+      awkward: '😳 Torpe'
+      happy: '😄 Feliz'
+      neutral: '🙂 Neutro'
+      question: '🤔 Pregunta'
+      sad: '😫 Triste'
+      surprised: '🤯 Sorprendido'
+      think: '🤨 Pensar'
     vrm:
       camera: Cámara
       model:

@@ -4,7 +4,7 @@ import { useSettings } from '@proj-airi/stage-ui/stores/settings'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { electronOpenMainDevtools } from '../../../../shared/eventa'
+import { electronOpenDevtoolsWindow, electronOpenMainDevtools } from '../../../../shared/eventa'
 import { useElectronEventaInvoke } from '../../../composables/electron-vueuse'
 
 const { t } = useI18n()
@@ -36,6 +36,12 @@ const menu = computed(() => [
     to: '/devtools/widgets-calling',
   },
   {
+    title: t('tamagotchi.settings.devtools.pages.context-flow.title'),
+    description: 'Inspect incoming context updates and outgoing chat stream events',
+    icon: 'i-solar:chat-square-call-bold-duotone',
+    to: '/devtools/context-flow',
+  },
+  {
     title: 'Relative Mouse',
     description: 'Get mouse position relative to the window',
     icon: 'i-solar:sledgehammer-bold-duotone',
@@ -47,9 +53,16 @@ const menu = computed(() => [
     icon: 'i-solar:sledgehammer-bold-duotone',
     to: '/devtools/providers-transcription-realtime-aliyun-nls',
   },
+  {
+    title: 'Beat Sync Visualizer',
+    description: 'Plot V-motion targets, trajectory, and scalar Y/Z over time',
+    icon: 'i-solar:chart-bold-duotone',
+    to: '/devtools/beat-sync',
+  },
 ])
 
 const openDevTools = useElectronEventaInvoke(electronOpenMainDevtools)
+const openMarkdownStressWindow = useElectronEventaInvoke(electronOpenDevtoolsWindow)
 </script>
 
 <template>
@@ -68,6 +81,20 @@ const openDevTools = useElectronEventaInvoke(electronOpenMainDevtools)
   >
     {{ t('settings.pages.page.developers.open-devtools.button') }}
   </ButtonBar>
+  <ButtonBar
+    v-motion
+    mb-2
+    icon="i-solar:code-bold-duotone"
+    :text="t('tamagotchi.settings.devtools.pages.markdown-stress.title')"
+    :initial="{ opacity: 0, y: 10 }"
+    :enter="{ opacity: 1, y: 0 }"
+    :duration="250 + (19 * 10)"
+    :delay="2 * 50"
+    transition="all ease-in-out duration-250"
+    @click="() => openMarkdownStressWindow({ route: '/devtools/markdown-stress' })"
+  >
+    {{ t('tamagotchi.settings.devtools.pages.markdown-stress.title') }}
+  </ButtonBar>
   <CheckBar
     v-model="settings.disableTransitions"
     v-motion
@@ -78,7 +105,7 @@ const openDevTools = useElectronEventaInvoke(electronOpenMainDevtools)
     :initial="{ opacity: 0, y: 10 }"
     :enter="{ opacity: 1, y: 0 }"
     :duration="250 + (19 * 10)"
-    :delay="2 * 50"
+    :delay="3 * 50"
     transition="all ease-in-out duration-250"
   />
   <CheckBar
@@ -92,7 +119,7 @@ const openDevTools = useElectronEventaInvoke(electronOpenMainDevtools)
     :initial="{ opacity: 0, y: 10 }"
     :enter="{ opacity: 1, y: 0 }"
     :duration="250 + (20 * 10)"
-    :delay="3 * 50"
+    :delay="4 * 50"
     transition="all ease-in-out duration-250"
   />
 

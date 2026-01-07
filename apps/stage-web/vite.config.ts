@@ -5,11 +5,11 @@ import VueI18n from '@intlify/unplugin-vue-i18n/vite'
 import Vue from '@vitejs/plugin-vue'
 import Unocss from 'unocss/vite'
 import Info from 'unplugin-info/vite'
-import VueMacros from 'unplugin-vue-macros/vite'
 import VueRouter from 'unplugin-vue-router/vite'
 import Yaml from 'unplugin-yaml/vite'
 import VueDevTools from 'vite-plugin-vue-devtools'
 import Layouts from 'vite-plugin-vue-layouts'
+import VueMacros from 'vue-macros/vite'
 
 import { Download } from '@proj-airi/unplugin-fetch/vite'
 import { DownloadLive2DSDK } from '@proj-airi/unplugin-live2d-sdk/vite'
@@ -57,6 +57,7 @@ export default defineConfig({
       '@proj-airi/stage-ui': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-ui', 'src')),
       '@proj-airi/stage-pages': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-pages', 'src')),
       '@proj-airi/stage-shared': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-shared', 'src')),
+      '@proj-airi/stage-layouts': resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-layouts', 'src')),
     },
   },
   server: {
@@ -66,6 +67,9 @@ export default defineConfig({
         `${resolve(join(import.meta.dirname, '..', '..', 'packages', 'stage-pages', 'src'))}/*.vue`,
       ],
     },
+  },
+  build: {
+    sourcemap: true,
   },
 
   plugins: [
@@ -96,7 +100,12 @@ export default defineConfig({
     }),
 
     // https://github.com/JohnCampionJr/vite-plugin-vue-layouts
-    Layouts(),
+    Layouts({
+      layoutsDirs: [
+        resolve(import.meta.dirname, 'src', 'layouts'),
+        resolve(import.meta.dirname, '..', '..', 'packages', 'stage-layouts', 'src', 'layouts'),
+      ],
+    }),
 
     // https://github.com/antfu/unocss
     // see uno.config.ts for config
@@ -113,6 +122,16 @@ export default defineConfig({
             short_name: 'AIRI',
             icons: [
               {
+                src: '/web-app-manifest-192x192.png',
+                sizes: '192x192',
+                type: 'image/png',
+              },
+              {
+                src: '/web-app-manifest-512x512.png',
+                sizes: '512x512',
+                type: 'image/png',
+              },
+              {
                 purpose: 'maskable',
                 sizes: '192x192',
                 src: '/maskable_icon_x192.png',
@@ -122,16 +141,6 @@ export default defineConfig({
                 purpose: 'maskable',
                 sizes: '512x512',
                 src: '/maskable_icon_x512.png',
-                type: 'image/png',
-              },
-              {
-                src: '/web-app-manifest-192x192.png',
-                sizes: '192x192',
-                type: 'image/png',
-              },
-              {
-                src: '/web-app-manifest-512x512.png',
-                sizes: '512x512',
                 type: 'image/png',
               },
             ],
@@ -164,7 +173,24 @@ export default defineConfig({
     Download('https://dist.ayaka.moe/vrm-models/VRoid-Hub/AvatarSample-B/AvatarSample_B.vrm', 'AvatarSample_B.vrm', 'vrm/models/AvatarSample-B', { parentDir: stageUIAssetsRoot, cacheDir: sharedCacheDir }),
 
     // HuggingFace Spaces
-    LFS({ root: cwd(), extraGlobs: ['*.vrm', '*.vrma', '*.hdr', '*.cmo3', '*.png', '*.jpg', '*.jpeg', '*.gif', '*.webp', '*.bmp', '*.ttf'] }),
+    LFS({ root: cwd(), extraGlobs: [
+      // Scene & Models
+      '*.vrm',
+      '*.vrma',
+      '*.hdr',
+      '*.cmo3',
+      // Images & Fonts
+      '*.png',
+      '*.jpg',
+      '*.jpeg',
+      '*.gif',
+      '*.webp',
+      '*.bmp',
+      '*.ttf',
+      '*.avif',
+      // Tensorflow / MediaPipe task
+      '*.task',
+    ] }),
     SpaceCard({
       root: cwd(),
       title: 'AIRI: Virtual Companion',

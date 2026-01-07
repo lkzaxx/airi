@@ -108,5 +108,8 @@ twitter-session.json
 
 # Symlinks created by nix build
 result*
+# Nix develop outputs
+outputs/
 
-
+# MediaPipe task assets
+packages/model-driver-mediapipe/tasks/assets/*

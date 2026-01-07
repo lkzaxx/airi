@@ -27,6 +27,7 @@ words:
   - baiducloud
   - bailian
   - bigserial
+  - bilibili
   - Bitstream
   - bootkit
   - browserbasehq
@@ -119,6 +120,7 @@ words:
   - histoire
   - hiyori
   - Holo
+  - homeassistant
   - huggingface
   - huggingspace
   - hunyuan
@@ -141,9 +143,11 @@ words:
   - libsamplerate
   - libsodium
   - lightningcss
+  - lipsync
   - listhen
   - live2dcubismcore
   - live2dcubismframework
+  - livechat
   - Llmmarker
   - lobehub
   - logg
@@ -158,7 +162,9 @@ words:
   - matchall
   - mdit
   - mediabunny
+  - mediapipe
   - MeshToonMaterial
+  - meteocons
   - micvad
   - mineflayer
   - mingcute
@@ -214,6 +220,7 @@ words:
   - pmrem
   - popmotion
   - poppin
+  - posthog
   - PREFLIGHTS
   - prereleased
   - pretrained
@@ -253,6 +260,7 @@ words:
   - sonarjs
   - sonner
   - specta
+  - splitpanes
   - splt
   - srgb
   - ssml
@@ -288,6 +296,7 @@ words:
   - vllm
   - Volcengine
   - vrma
+  - vrms
   - vtuber
   - vueuse
   - waapi

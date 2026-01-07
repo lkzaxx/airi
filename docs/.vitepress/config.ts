@@ -47,6 +47,7 @@ export default defineConfig({
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg', sizes: 'any' }],
     ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180' }],
     ['meta', { name: 'apple-mobile-web-app-title', content: projectName }],
+    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
     ['meta', { name: 'author', content: `${teamMembers.map(c => c.name).join(', ')} and ${projectName} contributors` }],
     ['meta', { name: 'keywords', content: '' }],
     ['meta', { property: 'og:title', content: projectName }],
@@ -61,12 +62,13 @@ export default defineConfig({
     ['link', { rel: 'mask-icon', href: '/logo.svg', color: '#ffffff' }],
     // Proxying Plausible through Netlify | Plausible docs
     // https://plausible.io/docs/proxy/guides/netlify
-    ['script', {
-      'defer': 'true',
-      'data-domain': 'airi.moeru.ai',
-      'data-api': 'https://airi.moeru.ai/api/v1/page-external-data/submit',
-      'src': 'https://airi.moeru.ai/remote-assets/page-external-data/js/script.js',
-    }],
+    ['script', { async: '', src: 'https://moeru-ai-airi-helper.kwaa.workers.dev/remote-assets/page-external-data/js/script.js' }],
+    ['script', {}, `
+      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+      plausible.init({
+        endpoint: "https://moeru-ai-airi-helper.kwaa.workers.dev/api/v1/page-external-data/submit"
+      })
+    `],
     ['script', {}, `
       ;(function () {
         const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -97,10 +99,33 @@ export default defineConfig({
               { text: 'Release Notes ', link: releases },
             ],
           },
+          {
+            text: 'About',
+            items: [
+              { text: 'Privacy Policy', link: withBase('/en/about/privacy') },
+              { text: 'Terms of Use', link: withBase('/en/about/terms') },
+            ],
+          },
         ],
         outline: {
           level: 'deep',
+          label: 'このページの内容',
         },
+        docFooter: {
+          prev: '前のページ',
+          next: '次のページ',
+        },
+        editLink: {
+          pattern: 'https://github.com/moeru-ai/airi/edit/main/docs/content/:path',
+          text: 'GitHub でこのページを編集',
+        },
+        lastUpdated: {
+          text: '最終更新',
+        },
+        darkModeSwitchLabel: '外観モード',
+        sidebarMenuLabel: 'メニュー',
+        returnToTopLabel: 'トップに戻る',
+        langMenuLabel: '言語を変更',
         logo: withBase('/favicon.svg'),
 
         sidebar: [
@@ -178,6 +203,13 @@ export default defineConfig({
               { text: '发布说明 ', link: releases },
             ],
           },
+          {
+            text: '关于',
+            items: [
+              { text: '隐私政策', link: withBase('/zh-Hans/about/privacy') },
+              { text: '使用条款', link: withBase('/zh-Hans/about/terms') },
+            ],
+          },
         ],
         outline: {
           level: 'deep',
@@ -209,13 +241,9 @@ export default defineConfig({
                 text: '参与贡献',
                 items: [
                   { text: '贡献代码', link: withBase('/zh-Hans/docs/overview/contributing/') },
-                  {
-                    text: '贡献设计',
-                    items: [
-                      { text: '参考资源', link: withBase('/zh-Hans/docs/overview/contributing/design-guidelines/resources') },
-                      { text: '工具', link: withBase('/zh-Hans/docs/overview/contributing/design-guidelines/tools') },
-                    ],
-                  },
+                  { text: '贡献设计', link: withBase('/zh-Hans/docs/overview/contributing/design-guidelines/') },
+                  { text: '参考资源', link: withBase('/zh-Hans/docs/overview/contributing/design-guidelines/resources') },
+                  { text: '工具', link: withBase('/zh-Hans/docs/overview/contributing/design-guidelines/tools') },
                 ],
               },
               { text: '有关 AI VTuber', link: withBase('/zh-Hans/docs/overview/about-ai-vtuber') },
@@ -241,6 +269,90 @@ export default defineConfig({
             text: '角色',
             icon: 'lucide:scan-face',
             link: withBase('/zh-Hans/characters/'),
+          },
+        ] as (DefaultTheme.SidebarItem & { icon?: string })[],
+      },
+    },
+    'ja': {
+      label: '日本語',
+      lang: 'ja',
+      themeConfig: {
+        // https://vitepress.dev/reference/default-theme-config
+        nav: [
+          { text: 'ドキュメント', link: withBase('/ja/docs/overview/') },
+          { text: 'ブログ', link: withBase('/ja/blog/') },
+          {
+            text: `v${version}`,
+            items: [
+              { text: 'リリースノート', link: releases },
+            ],
+          },
+          {
+            text: '概要',
+            items: [
+              { text: 'プライバシーポリシー', link: withBase('/ja/about/privacy') },
+              { text: '利用規約', link: withBase('/ja/about/terms') },
+            ],
+          },
+        ],
+        outline: {
+          level: 'deep',
+        },
+        logo: withBase('/favicon.svg'),
+
+        sidebar: [
+          {
+            text: '概要',
+            icon: 'lucide:rocket',
+            items: [
+              { text: 'はじめに', link: withBase('/ja/docs/overview/') },
+              {
+                text: 'ガイド',
+                items: [
+                  {
+                    text: 'デスクトップ版のガイド',
+                    link: withBase('/ja/docs/overview/guide/tamagotchi/'),
+                    items: [],
+                  },
+                  {
+                    text: 'Web 版のガイド',
+                    link: withBase('/ja/docs/overview/guide/web/'),
+                    items: [],
+                  },
+                ],
+              },
+              {
+                text: 'コントリビューション',
+                items: [
+                  { text: 'コードで貢献', link: withBase('/ja/docs/overview/contributing/') },
+                  { text: 'デザインで貢献', link: withBase('/ja/docs/overview/contributing/design-guidelines/') },
+                  { text: 'リソース', link: withBase('/ja/docs/overview/contributing/design-guidelines/resources') },
+                  { text: 'ツール', link: withBase('/ja/docs/overview/contributing/design-guidelines/tools') },
+                ],
+              },
+              { text: 'AI VTuber について', link: withBase('/ja/docs/overview/about-ai-vtuber') },
+              { text: 'Neuro-sama について', link: withBase('/ja/docs/overview/about-neuro-sama') },
+            ],
+          },
+          {
+            text: 'マニュアル',
+            icon: 'lucide:book-open',
+            items: [
+              { text: 'バージョン一覧', link: withBase('/ja/docs/manual/versions') },
+            ],
+          },
+          {
+            text: '年表',
+            icon: 'lucide:calendar-days',
+            items: [
+              { text: '初公開 v0.1.0', link: withBase('/ja/docs/chronicles/version-v0.1.0/') },
+              { text: '前日譚 v0.0.1', link: withBase('/ja/docs/chronicles/version-v0.0.1/') },
+            ],
+          },
+          {
+            text: 'キャラクター',
+            icon: 'lucide:scan-face',
+            link: withBase('/en/characters/'),
           },
         ] as (DefaultTheme.SidebarItem & { icon?: string })[],
       },

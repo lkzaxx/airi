@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChatProvider } from '@xsai-ext/shared-providers'
+import type { ChatProvider } from '@xsai-ext/providers/utils'
 
 import workletUrl from '@proj-airi/stage-ui/workers/vad/process.worklet?worker&url'
 
@@ -13,7 +13,7 @@ import { useConsciousnessStore } from '@proj-airi/stage-ui/stores/modules/consci
 import { useHearingSpeechInputPipeline } from '@proj-airi/stage-ui/stores/modules/hearing'
 import { useProvidersStore } from '@proj-airi/stage-ui/stores/providers'
 import { useSettingsAudioDevice } from '@proj-airi/stage-ui/stores/settings'
-import { refDebounced, useBroadcastChannel, watchPausable } from '@vueuse/core'
+import { refDebounced, useBroadcastChannel } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { computed, onUnmounted, ref, toRef, watch } from 'vue'
 
@@ -31,7 +31,6 @@ import {
 import { useControlsIslandStore } from '../stores/controls-island'
 import { useWindowStore } from '../stores/window'
 
-const resourceStatusIslandRef = ref<InstanceType<typeof ResourceStatusIsland>>()
 const controlsIslandRef = ref<InstanceType<typeof ControlsIsland>>()
 const widgetStageRef = ref<{ canvasElement: () => HTMLCanvasElement }>()
 const stageCanvas = toRef(() => widgetStageRef.value?.canvasElement())
@@ -46,7 +45,11 @@ const { isOutside: isOutsideWindow } = useElectronMouseInWindow()
 const { isOutside } = useElectronMouseInElement(controlsIslandRef)
 const isOutsideFor250Ms = refDebounced(isOutside, 250)
 const { x: relativeMouseX, y: relativeMouseY } = useElectronRelativeMouse()
-const isTransparent = useCanvasPixelIsTransparentAtPoint(stageCanvas, relativeMouseX, relativeMouseY)
+// NOTICE: In real-world use cases of Fade on Hover feature, the cursor may move around the edge of the
+// model rapidly, causing flickering effects when checking pixel transparency strictly.
+// Here we use `regionRadius` to help to detect with look-ahead strategy to relax the pixel accurate
+// check / detection on hovered underlying canvas pixel, therefore inaccurate mouse movements won't cause flickering.
+const isTransparent = useCanvasPixelIsTransparentAtPoint(stageCanvas, relativeMouseX, relativeMouseY, { regionRadius: 25 })
 const { isNearAnyBorder: isAroundWindowBorder } = useElectronMouseAroundWindowBorder({ threshold: 30 })
 const isAroundWindowBorderFor250Ms = refDebounced(isAroundWindowBorder, 250)
 
@@ -58,7 +61,7 @@ const { fadeOnHoverEnabled } = storeToRefs(useControlsIslandStore())
 
 watch(componentStateStage, () => isLoading.value = componentStateStage.value !== 'mounted', { immediate: true })
 
-const { pause, resume } = watchPausable(isTransparent, (transparent) => {
+const { pause, resume } = watch(isTransparent, (transparent) => {
   shouldFadeOnCursorWithin.value = fadeOnHoverEnabled.value && !transparent
 }, { immediate: true })
 
@@ -100,11 +103,18 @@ watch([isOutsideFor250Ms, isAroundWindowBorderFor250Ms, isOutsideWindow, isTrans
 const settingsAudioDeviceStore = useSettingsAudioDevice()
 const { stream, enabled } = storeToRefs(settingsAudioDeviceStore)
 const { startRecord, stopRecord, onStopRecord } = useAudioRecorder(stream)
-const { transcribeForRecording } = useHearingSpeechInputPipeline()
+const hearingPipeline = useHearingSpeechInputPipeline()
+const {
+  transcribeForRecording,
+  transcribeForMediaStream,
+  stopStreamingTranscription,
+} = hearingPipeline
+const { supportsStreamInput } = storeToRefs(hearingPipeline)
 const providersStore = useProvidersStore()
 const consciousnessStore = useConsciousnessStore()
 const { activeProvider: activeChatProvider, activeModel: activeChatModel } = storeToRefs(consciousnessStore)
 const chatStore = useChatStore()
+const shouldUseStreamInput = computed(() => supportsStreamInput.value && !!stream.value)
 
 const {
   init: initVAD,
@@ -113,8 +123,12 @@ const {
   loaded: vadLoaded,
 } = useVAD(workletUrl, {
   threshold: ref(0.6),
-  onSpeechStart: () => startRecord(),
-  onSpeechEnd: () => stopRecord(),
+  onSpeechStart: () => {
+    void handleSpeechStart()
+  },
+  onSpeechEnd: () => {
+    void handleSpeechEnd()
+  },
 })
 
 let stopOnStopRecord: (() => void) | undefined
@@ -125,6 +139,49 @@ type CaptionChannelEvent
     | { type: 'caption-assistant', text: string }
 const { post: postCaption } = useBroadcastChannel<CaptionChannelEvent, CaptionChannelEvent>({ name: 'airi-caption-overlay' })
 
+async function handleSpeechStart() {
+  if (shouldUseStreamInput.value && stream.value) {
+    await transcribeForMediaStream(stream.value, {
+      onSentenceEnd: (delta) => {
+        const finalText = delta
+        if (!finalText || !finalText.trim()) {
+          return
+        }
+
+        postCaption({ type: 'caption-speaker', text: finalText })
+
+        void (async () => {
+          try {
+            const provider = await providersStore.getProviderInstance(activeChatProvider.value)
+            if (!provider || !activeChatModel.value)
+              return
+
+            await chatStore.send(finalText, { model: activeChatModel.value, chatProvider: provider as ChatProvider })
+          }
+          catch (err) {
+            console.error('Failed to send chat from voice:', err)
+          }
+        })()
+      },
+      onSpeechEnd: (text) => {
+        postCaption({ type: 'caption-speaker', text })
+      },
+    })
+    return
+  }
+
+  startRecord()
+}
+
+async function handleSpeechEnd() {
+  if (shouldUseStreamInput.value) {
+    // Keep streaming session alive; idle timer in pipeline will handle teardown.
+    return
+  }
+
+  stopRecord()
+}
+
 async function startAudioInteraction() {
   try {
     await initVAD()
@@ -133,6 +190,9 @@ async function startAudioInteraction() {
 
     // Hook once
     stopOnStopRecord = onStopRecord(async (recording) => {
+      if (shouldUseStreamInput.value)
+        return
+
       const text = await transcribeForRecording(recording)
       if (!text || !text.trim())
         return
@@ -161,6 +221,7 @@ function stopAudioInteraction() {
   try {
     stopOnStopRecord?.()
     stopOnStopRecord = undefined
+    void stopStreamingTranscription(true)
     disposeVAD()
   }
   catch {}
@@ -218,7 +279,7 @@ watch([stream, () => vadLoaded.value], async ([s, loaded]) => {
           'transition-opacity duration-250 ease-in-out',
         ]"
       >
-        <ResourceStatusIsland ref="resourceStatusIslandRef" />
+        <ResourceStatusIsland />
         <WidgetStage
           ref="widgetStageRef"
           v-model:state="componentStateStage"
